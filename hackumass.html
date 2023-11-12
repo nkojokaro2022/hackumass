@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Quiz</title>
+    <style>
+
+        body {
+            margin: 20px;
+            background-color: lavender;
+            text-align:center;
+            font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+            font-size: 20px;
+            color: rgb(60, 59, 59);
+        }
+
+        #quiz-container {
+            max-width: 600px;
+            margin: auto;
+            
+       
+        }
+
+        .question {
+            margin-bottom: 20px;
+         
+    
+        }
+        #languages{
+            font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+            font-size: 20px;
+        }
+        button {
+            padding: 10px;
+            font-size: 20px;
+            background-color:rgb(43, 43, 43);
+            color:white;
+            cursor: pointer;
+            border: 0px;
+            border-radius: 10px;
+            font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+        }
+
+    </style>
+</head>
+<body>
+<h1>TRAVEL GUIDER</h1>
+<p><i>Find Your Next Adventure</i></p>
+<div id="quiz-container">
+    <div class="question">
+        <p>1. When are you looking to travel?</p>
+        <input type="radio" name="q1" value="winter" id="q1_1"> Winter<br>
+        <input type="radio" name="q1" value="spring"> Spring<br>
+        <input type="radio" name="q1" value="summer"> Summer<br>
+        <input type="radio" name="q1" value="fall"> Fall<br>
+    </div>
+    <div class="question">
+        <p>2. What is your favorite weather?</p>
+        <input type="radio" name="q2" value="hot"> 80° and above<br>
+        <input type="radio" name="q2" value="warm"> 65°- 80°<br>
+        <input type="radio" name="q2" value="cold"> 45°- 65°<br>
+        <input type="radio" name="q2" value="freezing"> 45° and below<br>
+    </div>
+    <div class="question">
+        <p>3. Do you want to be by the beach?</p>
+        <input type="radio" name="q3" value="yes"> Yes<br>
+        <input type="radio" name="q3" value="no"> No<br>
+    </div>
+    <div class="question">
+        <p>4. Do you want to be in a city?</p>
+        <input type="radio" name="q4" value="yes"> Yes<br>
+        <input type="radio" name="q4" value="no"> No<br>
+    </div>
+    <div class="question">
+        <p>5. Who will you be traveling with?</p>
+        <input type="radio" name="q5" value="family"> Family<br>
+        <input type="radio" name="q5" value="friends"> Friends<br>
+        <input type="radio" name="q5" value="alone"> Alone<br>
+    </div>
+  
+    <div class="question">
+        <p>6. How important is nightlife for you?</p>
+        <input type="radio" name="q6" value="important"> Very important<br>
+        <input type="radio" name="q6" value="somewhat">Somewhat important<br>
+        <input type="radio" name="q6" value="notImportant"> Not Important<br>
+    </div>
+    <div class="question">
+        <p>7. How budget friendly will your trip be?</p>
+        <input type="radio" name="q7" value="important"> Very budget friendly<br>
+        <input type="radio" name="q7" value="somewhat">Somewhat budget friendly<br>
+        <input type="radio" name="q7" value="notImportant"> Not budget friendly<br>
+    </div>
+
+    <p value="lang">8. What language would you like to speak on your trip?</p> 
+        <select name="languages" id="languages"> 
+        <option value="english">English</option> 
+        <option value="spanish">Spanish</option> 
+        <option value="italian">Italian</option> 
+        <option value="arabic">Arabic</option> 
+        <option value="dutch">Dutch</option> 
+        <option value="french">French</option> 
+        <option value="nopref">No Preference</option> 
+    </select>
+
+    <br>
+   
+ 
+
+    <p id="result"></p>
+</div>
+
+<script>
+    class Location {
+        constructor(city, country, nightlife_rating, coastal, urban, family_friendly, budget_friendly, languages, rating, weather) {
+            this.city = city;
+            this.country = country;
+            //will increase as user is quizzed about preferences
+            this.rating = 0;
+
+            //1-10 rating
+            this.nightlife_rating = nightlife_rating;
+            this.budget_friendly = budget_friendly;
+            //bool
+            this.coastal = coastal;
+            this.urban = urban;
+            this.family_friendly = family_friendly;
+            //array of languages
+            this.languages = Array.isArray(languages) ? languages : [languages];            //array 0-3 of seasons' average temps
+            this.weather = weather;
+        }
+    }
+    const quizData = [
+        new Location("Dubai", "United Arab Emirates", 10, true, true, false, 3, ["Arabic", "English"], 0, [65, 80, 95, 80]),
+        new Location("New York City", "United States", 10, false, true, true, 2, ["English"], 0, [32, 50, 80, 50]),
+        new Location("Amsterdam", "Netherlands", 9, false, true, false, 3, ["Dutch"], 0, [35, 57, 65, 47]),
+        new Location("Barcelona", "Spain", 10, true, true, false, 7, ["Catalan", "Spanish"], 0, [55, 63, 80, 69]),
+        new Location("Cancun", "Mexico", 7, true, false, true, 7, ["Spanish", "English"], 0, [79, 85, 87, 83]),
+        new Location("Rome", "Italy", 8, false, false, false, 6, ["Italian"], 0, [48, 60, 80, 62]),
+        new Location("Montreal", "Canada", 9, false, true, true, 6, ["French"], 0, [24, 45, 78, 57]),
+        new Location("Tokyo", "Japan", 9, false, true, true, 4, ["French"], 0, [24, 45, 78, 57])
+        // Add more Location instances as needed
+    ];
+
+    let highestRatedCity = null;
+
+    function submitQuiz() {
+        //reset ratings to 0
+        quizData.forEach(city => {
+            city.rating = 0;
+        });
+
+        //determine season of trip
+        var season = 0;
+        // Check answers for each question
+        if (document.querySelectorAll('input[name="q1"]:checked').value === "winter") {
+            season = 0;
+        }else if (document.querySelectorAll('input[name="q1"]:checked').value === "spring") {
+            season = 1;
+        }else if (document.querySelectorAll('input[name="q1"]:checked').value === "summer") {
+            season = 2;
+        }else if (document.querySelectorAll('input[name="q1"]:checked').value === "fall") {
+            season = 3;
+        }
+        console.log("Season:", season)
+
+        if (document.querySelectorAll('input[name="q2"]:checked').value === "hot") {
+            quizData.forEach((city, index) => {
+                if (city.weather[season] >= 80)
+                    city.rating += 10;
+            });
+        }else if (document.querySelectorAll('input[name="q2"]:checked').value === "warm") {
+            quizData.forEach((city, index) => {
+                if (city.weather[season] < 80 && city.weather[season] >= 65)
+                    city.rating += 10;
+            });
+        }else if (document.querySelectorAll('input[name="q2"]:checked').value === "cold") {
+            quizData.forEach((city, index) => {
+                if (city.weather[season] < 65 && city.weather[season] >= 45)
+                    city.rating += 10;
+            });
+        }else if (document.querySelectorAll('input[name="q2"]:checked').value === "freezing") {
+            quizData.forEach((city, index) => {
+                if (city.weather[season] < 45)
+                    city.rating += 10;
+            });
+        }
+        
+        if (document.querySelectorAll('input[name="q3"]:checked').value === "yes") {
+            quizData.forEach((city, index) => {
+                if (city.coastal)
+                    city.rating += 10;
+            });
+        }else {
+            quizData.forEach((city, index) => {
+                if (!city.coastal)
+                    city.rating += 10; 
+            });
+        }
+
+        if (document.querySelectorAll('input[name="q4"]:checked').value === "yes") {
+            quizData.forEach((city, index) => {
+                if (city.urban)
+                    city.rating += 10;
+            });
+        }else {
+            quizData.forEach((city, index) => {
+                if (!city.urban)
+                    city.rating += 10;
+            });
+        }
+
+        if (document.querySelectorAll('input[name="q5"]:checked').value === "family") {
+            quizData.forEach((city, index) => {
+                if (city.family_friendly)
+                    city.rating += 10;
+            });
+        }
+
+        if (document.querySelectorAll('input[name="q6"]:checked').value === "important") {
+            quizData.forEach((city, index) => {
+                if (city.nightlife_rating > 7)
+                    city.rating += 10;
+            });
+        }else if (document.querySelectorAll('input[name="q6"]:checked').value === "somewhat") {
+            quizData.forEach((city, index) => {
+                if (city.nightlife_rating > 5)
+                    city.rating += 10;
+            });
+        }
+
+
+        if (document.querySelectorAll('input[name="q7"]:checked').value === "important") {
+            quizData.forEach((city, index) => {
+                if (city.budget_friendly > 7)
+                    city.rating += 10;
+            });
+        }else if (document.querySelectorAll('input[name="q7"]:checked').value === "somewhat") {
+            quizData.forEach((city, index) => {
+                if (city.budget_friendly > 5)
+                    city.rating += 10;
+            });
+        }
+
+        if (document.getElementById('languages').value === "english") {
+            quizData.forEach((city, index) => {
+                if (city.languages.includes("English"))
+                    city.rating += 20;
+            });
+        }else if (document.getElementById('languages').value === "spanish") {
+            quizData.forEach((city, index) => {
+                if (city.languages.includes("Spanish"))
+                    city.rating += 20;
+            });
+        }else if (document.getElementById('languages').value === "italian") {
+            quizData.forEach((city, index) => {
+                if (city.languages.includes("Italian"))
+                    city.rating += 20;
+            });
+        }else if (document.getElementById('languages').value === "arabic") {
+            quizData.forEach((city, index) => {
+                if (city.languages.includes("Arabic"))
+                    city.rating += 20;
+            });
+        }else if (document.getElementById('languages').value === "dutch") {
+            quizData.forEach((city, index) => {
+                if (city.languages.includes("Dutch"))
+                    city.rating += 20;
+            });
+        }else if (document.getElementById('languages').value === "french") {
+            quizData.forEach((city, index) => {
+                if (city.languages.includes("French"))
+                    city.rating += 20;
+            });
+        }
+
+        let highestRating = 0;
+
+        //Loop through quizData to calculate the total rating and find the highest rated city
+        quizData.forEach((city) => {
+
+            // Check if this city has a higher rating than the current highestRating
+            if (city.rating > highestRating) {
+                highestRating = city.rating;
+                highestRatedCity = city.city;
+            }
+        });
+    }
+    
+    function outputText() {
+        // Call submitQuiz to update city ratings
+        submitQuiz();
+        quizData.forEach(city => {
+            console.log(city.city+ ', '+ city.rating);
+        });
+
+        const outputParagraph = document.getElementById('output');
+        outputParagraph.textContent = 'Your result is: ' + highestRatedCity;
+    }
+    
+</script>
+<br>
+
+
+<button onclick="outputText()">Get Results</button>
+<p id="output"> </p>
+
+
+
+
+</body>
+</html>
+    
